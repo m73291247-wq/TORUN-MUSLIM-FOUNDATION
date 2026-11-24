@@ -1,0 +1,177 @@
+
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Profile - TORUN MUSLIM FOUNDATION</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;padding:25px 15px;font-family:Arial;
+ background:#061f18;color:white;
+}
+.card{
+ max-width:420px;margin:30px auto;padding:25px;
+ background:#103b2d;border:1px solid #b99a52;
+ border-radius:20px;text-align:center;
+}
+h2{color:#e6c477}
+.avatar{
+ width:110px;height:110px;border-radius:50%;
+ object-fit:cover;border:3px solid #d5b66c;
+ background:#fff;
+}
+input{
+ width:100%;padding:12px;margin:10px 0;
+ border-radius:8px;border:1px solid #b99a52;
+}
+button{
+ width:100%;padding:13px;margin-top:12px;
+ border:0;border-radius:9px;
+ background:#d5b66c;color:#102d21;
+ font-weight:bold;font-size:15px;
+}
+.info{color:#d5e5dc;overflow-wrap:anywhere}
+a{color:#e6c477}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>☪ My Profile</h2>
+
+<img id="photo" class="avatar"
+src="https://placehold.co/110x110?text=User">
+
+<h3 id="name">Loading...</h3>
+<p id="email" class="info"></p>
+<p id="phone" class="info"></p>
+
+<input type="file" id="photoInput" accept="image/*">
+<button id="savePhoto">Save Profile Photo</button>
+
+<p id="message"></p>
+
+<button onclick="location.href='index.html'">
+Back to Dashboard
+</button>
+
+<button id="logout">Logout</button>
+</div>
+
+<script type="module">
+import {initializeApp}
+from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+
+import {getAuth,onAuthStateChanged,signOut}
+from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
+
+import {getFirestore,doc,getDoc}
+from "https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js";
+
+const firebaseConfig={
+ apiKey:"AIzaSyAtctGzGlfCUZRl20DYObnknnCA9pgLbx4",
+ authDomain:"torun-muslim-found.firebaseapp.com",
+ projectId:"torun-muslim-found",
+ storageBucket:"torun-muslim-found.firebasestorage.app",
+ messagingSenderId:"247180809222",
+ appId:"1:247180809222:web:28d055136f8bc747769f87",
+ measurementId:"G-BKFXFKQSQF"
+};
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+
+let currentUser=null;
+let selectedPhoto="";
+
+onAuthStateChanged(auth,async user=>{
+ if(!user){
+  location.href="login.html";
+  return;
+ }
+ currentUser=user;
+
+ document.getElementById("name").textContent=
+ user.displayName || "User";
+
+ document.getElementById("email").textContent=
+ "Gmail: "+(user.email || "");
+
+ try{
+  const snap=await getDoc(doc(db,"users",user.uid));
+  if(snap.exists()){
+   const data=snap.data();
+   document.getElementById("name").textContent=
+    data.name || user.displayName || "User";
+   document.getElementById("phone").textContent=
+    "Mobile: "+(data.phone || "Not added");
+  }
+ }catch(error){
+  document.getElementById("message").textContent=
+   "Profile data load হয়নি: "+error.message;
+ }
+
+ if(user.photoURL){
+  document.getElementById("photo").src=user.photoURL;
+ }
+});
+
+document.getElementById("photoInput").addEventListener("change",e=>{
+ const file=e.target.files[0];
+ if(!file)return;
+
+ if(file.size>1024*1024){
+  alert("ছবির সাইজ ১ MB-এর কম রাখো।");
+  e.target.value="";
+  return;
+ }
+
+ if(!file.type.startsWith("image/")){
+  alert("শুধু ছবি নির্বাচন করো।");
+  return;
+ }
+
+ selectedPhoto=file;
+ document.getElementById("photo").src=
+  URL.createObjectURL(file);
+});
+
+document.getElementById("savePhoto").onclick=async()=>{
+ if(!currentUser || !selectedPhoto){
+  alert("আগে একটি ছবি নির্বাচন করো।");
+  return;
+ }
+
+ try{
+  const reader=new FileReader();
+  reader.onload=async()=>{
+   try{
+    await updateProfile(currentUser,{
+     photoURL:reader.result
+    });
+    document.getElementById("message").textContent=
+     "Profile photo saved!";
+   }catch(error){
+    document.getElementById("message").textContent=
+     "ছবি সেভ হয়নি: "+error.message;
+   }
+  };
+  reader.readAsDataURL(selectedPhoto);
+ }catch(error){
+  document.getElementById("message").textContent=error.message;
+ }
+};
+
+import {updateProfile}
+from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
+
+document.getElementById("logout").onclick=async()=>{
+ await signOut(auth);
+ location.href="login.html";
+};
+</script>
+</body>
+</html>
