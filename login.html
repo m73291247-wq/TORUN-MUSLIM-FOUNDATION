@@ -1,49 +1,104 @@
+
 <!DOCTYPE html>
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login - TORUN MUSLIM FOUNDATION</title>
+
 <style>
-body {
-  font-family: Arial;
-  background: #edf3f8;
-  text-align: center;
-  padding: 30px 15px;
+*{box-sizing:border-box}
+body{
+ margin:0;padding:20px;min-height:100vh;
+ display:flex;align-items:center;justify-content:center;
+ font-family:Arial,sans-serif;
+ background:linear-gradient(135deg,#063b2b,#087653);
 }
-.card {
-  background: white;
-  padding: 25px;
-  border-radius: 15px;
-  max-width: 350px;
-  margin: auto;
+.card{
+ width:100%;max-width:400px;background:white;
+ padding:30px 23px;border-radius:22px;
+ box-shadow:0 15px 40px #002b2055;
 }
-input {
-  width: 90%;
-  padding: 13px;
-  margin: 10px 0;
-  border: 1px solid #ccc;
-  border-radius: 7px;
+.logo{text-align:center;font-size:40px}
+h2{text-align:center;color:#087653}
+h3{text-align:center;color:#087653;font-size:17px}
+.subtitle{text-align:center;color:#777;margin-bottom:25px}
+input{
+ width:100%;padding:15px;margin-bottom:15px;
+ border:1px solid #d5e5dc;border-radius:12px;
+ font-size:15px;background:#f7fbf8;
 }
-button {
-  background: #0756a5;
-  color: white;
-  padding: 13px;
-  border: 0;
-  border-radius: 7px;
-  width: 100%;
+button{
+ width:100%;padding:15px;border:0;border-radius:12px;
+ background:linear-gradient(90deg,#087653,#0ba36d);
+ color:white;font-size:17px;font-weight:bold;
 }
+p{text-align:center;color:#555}
+a{color:#087653;font-weight:bold}
+#message{color:#087653}
 </style>
 </head>
+
 <body>
 <div class="card">
-<h2>☪ Welcome Back</h2>
+<div class="logo">🌙</div>
+<h2>Welcome Back</h2>
 <h3>TORUN MUSLIM FOUNDATION</h3>
-<input type="text" placeholder="Mobile or Gmail">
-<input type="password" placeholder="Password">
-<button>Login</button>
-<p>Forgot Password?</p>
+<p class="subtitle">Login to Your Account</p>
+
+<form id="loginForm">
+<input id="email" type="email" placeholder="Gmail Address" required>
+<input id="password" type="password" placeholder="Password" required>
+<button type="submit" id="loginBtn">Login</button>
+</form>
+
+<p id="message"></p>
+<p><a href="forgot-password.html">Forgot Password?</a></p>
 <p>Don't have an account? <a href="register.html">Register</a></p>
 </div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+import {
+ getAuth,
+ signInWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
+
+const firebaseConfig = {
+ apiKey: "AIzaSyAtctGzGlfCUZRl20DYObnknnCA9pgLbx4",
+ authDomain: "torun-muslim-found.firebaseapp.com",
+ projectId: "torun-muslim-found",
+ storageBucket: "torun-muslim-found.firebasestorage.app",
+ messagingSenderId: "247180809222",
+ appId: "1:247180809222:web:28d055136f8bc747769f87",
+ measurementId: "G-BKFXFKQSQF"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+document.getElementById("loginForm").addEventListener("submit", async (e)=>{
+ e.preventDefault();
+
+ const email = document.getElementById("email").value.trim();
+ const password = document.getElementById("password").value;
+ const message = document.getElementById("message");
+ const btn = document.getElementById("loginBtn");
+
+ btn.disabled = true;
+ btn.textContent = "Logging in...";
+
+ try{
+  await signInWithEmailAndPassword(auth,email,password);
+  message.textContent = "Login Successful!";
+  window.location.href = "index.html";
+ }catch(error){
+  message.textContent = error.message;
+ }finally{
+  btn.disabled = false;
+  btn.textContent = "Login";
+ }
+});
+</script>
 </body>
 </html>
