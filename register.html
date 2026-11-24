@@ -5,49 +5,93 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Register - TORUN MUSLIM FOUNDATION</title>
-<style>
-body {
-  font-family: Arial;
-  background: #edf3f8;
-  text-align: center;
-  padding: 20px 10px;
-}
-.card {
-  background: white;
-  padding: 22px;
-  border-radius: 15px;
-  max-width: 380px;
-  margin: auto;
-}
-input {
-  box-sizing: border-box;
-  width: 100%;
-  padding: 13px;
-  margin: 8px 0;
-  border: 1px solid #ccc;
-  border-radius: 7px;
-}
-button {
-  background: #0756a5;
-  color: white;
-  padding: 13px;
-  border: 0;
-  border-radius: 7px;
-  width: 100%;
-}
-</style>
 </head>
 <body>
-<div class="card">
-<h2>☪ Create Account</h2>
-<h3>TORUN MUSLIM FOUNDATION</h3>
-<input type="text" placeholder="Your Full Name">
-<input type="email" placeholder="Your Gmail">
-<input type="tel" placeholder="Mobile Number">
-<input type="password" placeholder="Create Password">
-<input type="password" placeholder="Confirm Password">
-<button type="button">Register</button>
-<p>Already have an account? <a href="login.html">Login</a></p>
-</div>
+<h2>☪ TORUN MUSLIM FOUNDATION</h2>
+<h3>Create Account</h3>
+
+<input id="name" placeholder="Full Name"><br><br>
+<input id="email" type="email" placeholder="Gmail"><br><br>
+<input id="phone" type="tel" placeholder="+8801XXXXXXXXX"><br><br>
+<input id="password" type="password" placeholder="Password"><br><br>
+
+<button id="sendOtp">Send OTP</button>
+<br><br>
+<input id="otp" placeholder="Enter OTP"><br><br>
+<button id="register">Register</button>
+
+<p id="message"></p>
+<div id="recaptcha-container"></div>
+
+<script type="module">
+import { initializeApp } from
+"https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+
+import {
+ getAuth, RecaptchaVerifier, signInWithPhoneNumber,
+ createUserWithEmailAndPassword, PhoneAuthProvider,
+ linkWithCredential, sendEmailVerification
+} from
+"https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
+
+const firebaseConfig = {
+ apiKey: "AIzaSyAtctGzGlfCUZRl20DYObnknnCA9pgLbx4",
+ authDomain: "torun-muslim-found.firebaseapp.com",
+ projectId: "torun-muslim-found",
+ storageBucket: "torun-muslim-found.firebasestorage.app",
+ messagingSenderId: "247180809222",
+ appId: "1:247180809222:web:28d055136f8bc747769f87",
+ measurementId: "G-BKFXFKQSQF"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const msg = document.getElementById("message");
+
+let confirmationResult;
+
+const verifier = new RecaptchaVerifier(auth, "recaptcha-container", {});
+
+document.getElementById("sendOtp").onclick = async () => {
+ try {
+  const phone = document.getElementById("phone").value.trim();
+  confirmationResult = await signInWithPhoneNumber(auth, phone, verifier);
+  msg.textContent = "OTP পাঠানো হয়েছে।";
+ } catch(e) {
+  msg.textContent = e.message;
+ }
+};
+
+document.getElementById("register").onclick = async () => {
+ try {
+  if (!confirmationResult) throw new Error("আগে OTP নিন।");
+
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const otp = document.getElementById("otp").value.trim();
+
+  if (!name || !email || !password || !otp)
+   throw new Error("সব তথ্য পূরণ করুন।");
+
+  const phoneResult = await confirmationResult.confirm(otp);
+  const phoneCredential = PhoneAuthProvider.credential(
+   confirmationResult.verificationId, otp
+  );
+
+  const userCredential = await createUserWithEmailAndPassword(
+   auth, email, password
+  );
+
+  await linkWithCredential(userCredential.user, phoneCredential);
+  await sendEmailVerification(userCredential.user);
+
+  msg.textContent = "Registration সফল! Gmail যাচাই করুন।";
+
+ } catch(e) {
+  msg.textContent = "সমস্যা: " + e.message;
+ }
+};
+</script>
 </body>
 </html>
