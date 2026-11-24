@@ -4,58 +4,109 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TORUN MUSLIM FOUNDATION</title>
+
 <style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f0f4f8;
-  color: #172b4d;
+*{box-sizing:border-box}
+body{
+ margin:0;font-family:Arial,sans-serif;
+ background:#edf7f1;color:#173b2d;
 }
-header {
-  background: #0756a5;
-  color: white;
-  padding: 25px 15px;
-  text-align: center;
+header{
+ background:linear-gradient(135deg,#063b2b,#087653);
+ color:white;text-align:center;padding:25px 15px;
 }
-.logo { font-size: 40px; }
-main {
-  padding: 20px;
-  text-align: center;
+.logo{font-size:42px}
+header h2{font-size:21px}
+main{max-width:600px;margin:auto;padding:18px}
+.card{
+ background:white;padding:22px;margin:15px 0;
+ border-radius:17px;
+ box-shadow:0 4px 15px #00000012;
 }
-.card {
-  background: white;
-  padding: 20px;
-  margin: 15px 0;
-  border-radius: 12px;
+h3{color:#087653}
+button{
+ background:#087653;color:white;border:0;
+ padding:13px 20px;border-radius:10px;
+ margin:5px;font-size:15px;
 }
-button {
-  background: #0756a5;
-  color: white;
-  border: 0;
-  padding: 12px 25px;
-  border-radius: 8px;
-  margin: 5px;
-}
+.logout{background:#b83232}
+a{color:#087653;text-decoration:none;font-weight:bold}
+#userInfo{color:#087653;font-weight:bold}
 </style>
 </head>
+
 <body>
 <header>
-  <div class="logo">☪</div>
-  <h2>TORUN MUSLIM FOUNDATION</h2>
-  <p>Connect • Unite • Serve</p>
+<div class="logo">🌙</div>
+<h2>TORUN MUSLIM FOUNDATION</h2>
+<p>Connect • Unite • Serve</p>
 </header>
-<main>
-  <div class="card">
-    <h2>স্বাগতম!</h2>
-    <p>আমাদের মুসলিম কমিউনিটিতে যুক্ত হোন।</p>
-<button onclick="location.href='login.html'">Login</button>
 
-<button onclick="location.href='register.html'">Register</button>
-  </div>
-  <div class="card">
-    <h3>আমাদের লক্ষ্য</h3>
-    <p>একতা, সহযোগিতা ও মানবসেবা।</p>
-  </div>
+<main>
+<div class="card">
+<h2>স্বাগতম!</h2>
+<p>TORUN MUSLIM FOUNDATION কমিউনিটিতে তোমাকে স্বাগতম।</p>
+<p id="userInfo">তোমার অ্যাকাউন্ট যাচাই হচ্ছে...</p>
+<button class="logout" id="logoutBtn">Logout</button>
+</div>
+
+<div class="card">
+<h3>আমার প্রোফাইল</h3>
+<p>তোমার ব্যক্তিগত তথ্য ও অ্যাকাউন্ট।</p>
+</div>
+
+<div class="card">
+<h3>পোস্ট</h3>
+<p>শিগগিরই এখানে পোস্ট ও ছবি শেয়ার করতে পারবে।</p>
+</div>
+
+<div class="card">
+<h3>বন্ধু ও মেসেজ</h3>
+<p>শিগগিরই বন্ধুদের সঙ্গে যোগাযোগ করতে পারবে।</p>
+</div>
+
+<div class="card">
+<h3>আমাদের লক্ষ্য</h3>
+<p>একতা, সহযোগিতা ও মানবসেবা।</p>
+</div>
 </main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+import {
+ getAuth,onAuthStateChanged,signOut
+} from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
+
+const firebaseConfig = {
+ apiKey: "AIzaSyAtctGzGlfCUZRl20DYObnknnCA9pgLbx4",
+ authDomain: "torun-muslim-found.firebaseapp.com",
+ projectId: "torun-muslim-found",
+ storageBucket: "torun-muslim-found.firebasestorage.app",
+ messagingSenderId: "247180809222",
+ appId: "1:247180809222:web:28d055136f8bc747769f87",
+ measurementId: "G-BKFXFKQSQF"
+};
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+
+onAuthStateChanged(auth,(user)=>{
+ if(user){
+  document.getElementById("userInfo").textContent =
+   "স্বাগতম, "+(user.displayName || user.email);
+ }else{
+  window.location.href="login.html";
+ }
+});
+
+document.getElementById("logoutBtn").addEventListener("click",async()=>{
+ try{
+  await signOut(auth);
+  window.location.href="login.html";
+ }catch(error){
+  alert("Logout করা যায়নি: "+error.message);
+ }
+});
+</script>
 </body>
 </html>
