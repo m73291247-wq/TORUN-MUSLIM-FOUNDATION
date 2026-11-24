@@ -74,7 +74,7 @@ document.getElementById("register").onclick = async () => {
   if (!name || !email || !password || !otp)
    throw new Error("সব তথ্য পূরণ করুন।");
 
-  const phoneResult = await confirmationResult.confirm(otp);
+ 
   const phoneCredential = PhoneAuthProvider.credential(
    confirmationResult.verificationId, otp
   );
