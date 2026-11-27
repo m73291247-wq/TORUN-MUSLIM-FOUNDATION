@@ -1,169 +1,162 @@
+
 <!DOCTYPE html>
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TORUN MUSLIM FOUNDATION</title>
-
 <style>
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f4f6f2;
-  color: #183b2c;
-}
-
-header {
-  background: linear-gradient(135deg, #062c20, #087653);
-  color: white;
-  text-align: center;
-  padding: 35px 15px;
-  border-radius: 0 0 28px 28px;
-  box-shadow: 0 5px 20px #002b2030;
-}
-
-.logo {
-  font-size: 48px;
-}
-
-header h2 {
-  color: #f5d58b;
-  letter-spacing: 1px;
-}
-
-header p {
-  color: #e0eee5;
-}
-
-main {
-  max-width: 650px;
-  margin: auto;
-  padding: 20px 15px 35px;
-}
-
-.card {
-  background: white;
-  padding: 23px;
-  margin: 17px 0;
-  border-radius: 20px;
-  border: 1px solid #e4eade;
-  box-shadow: 0 5px 18px #183b2c12;
-}
-
-.card h2, .card h3 {
-  color: #087653;
-}
-
-.card p {
-  line-height: 1.7;
-  color: #64756a;
-}
-
-button {
-  background: linear-gradient(135deg, #087653, #064b36);
-  color: #f5d58b;
-  border: 0;
-  padding: 13px 25px;
-  border-radius: 12px;
-  margin: 5px;
-  font-size: 15px;
-  font-weight: bold;
-}
-
-button:active {
-  transform: scale(0.97);
-}
-
-.logout {
-  background: #a83232;
-  color: white;
-}
-
-#userInfo {
-  color: #087653;
-  font-weight: bold;
-}
+*{box-sizing:border-box}
+body{margin:0;background:#eef4ef;font-family:Arial,sans-serif;color:#183629}
+header{background:#075b3d;color:white;padding:17px;position:sticky;top:0;z-index:5}
+header h3{margin:0;color:#f4d58c}
+header p{margin:5px 0 0;font-size:12px}
+.container{max-width:650px;margin:auto;padding:12px}
+.card{background:white;border-radius:14px;padding:15px;margin-bottom:13px;box-shadow:0 2px 9px #00000010}
+.story{display:flex;gap:12px;overflow:auto}
+.story div{min-width:75px;text-align:center;font-size:12px}
+.story img{width:62px;height:62px;border-radius:50%;border:3px solid #159765;object-fit:cover}
+textarea{width:100%;border:1px solid #dce7df;border-radius:12px;padding:12px;resize:vertical;font:15px Arial}
+button{border:0;border-radius:9px;padding:10px 14px;cursor:pointer;font-weight:bold}
+.green{background:#08764d;color:white}
+.light{background:#e5f2e9;color:#075b3d}
+.actions{display:flex;justify-content:space-around;border-top:1px solid #eee;padding-top:10px;margin-top:12px}
+.actions button{background:white;color:#176644}
+.post-head{display:flex;align-items:center;gap:10px}
+.avatar{width:43px;height:43px;border-radius:50%;object-fit:cover;background:#dceee2}
+.post-img{width:100%;max-height:420px;object-fit:cover;border-radius:10px;margin-top:12px}
+nav{position:fixed;bottom:0;left:0;right:0;background:white;display:flex;justify-content:space-around;padding:10px 2px;border-top:1px solid #ddd;z-index:10}
+nav a{text-decoration:none;color:#176644;font-size:11px;text-align:center}
+nav span{display:block;font-size:21px;margin-bottom:3px}
+main{padding-bottom:75px}
+input[type=file]{display:none}
 </style>
-
-
 </head>
-
 <body>
 <header>
-<div class="logo">🌙</div>
-<h2>TORUN MUSLIM FOUNDATION</h2>
-<p>Connect • Unite • Serve</p>
+<h3>☪ TORUN MUSLIM FOUNDATION</h3>
+<p>একসাথে ভালো কাজের পথে</p>
 </header>
+<main class="container">
 
-<main>
 <div class="card">
-<h2>স্বাগতম!</h2>
-<p>TORUN MUSLIM FOUNDATION কমিউনিটিতে তোমাকে স্বাগতম।</p>
-<p id="userInfo">তোমার অ্যাকাউন্ট যাচাই হচ্ছে...</p>
-<button class="logout" id="logoutBtn">Logout</button>
+<b>Stories</b>
+<div class="story" style="margin-top:12px">
+<div><img src="https://placehold.co/100x100?text=You"><p>Your Story</p></div>
+<div><img src="https://placehold.co/100x100?text=TMF"><p>Foundation</p></div>
+<div><img src="https://placehold.co/100x100?text=User"><p>Community</p></div>
+</div>
 </div>
 
 <div class="card">
-<h3>আমার প্রোফাইল</h3>
-<p>তোমার ব্যক্তিগত তথ্য ও অ্যাকাউন্ট।</p>
+<b>What's on your mind?</b>
+<textarea id="postText" rows="3" placeholder="তোমার মনের কথা লিখো..."></textarea>
+<input id="postPhoto" type="file" accept="image/*,video/*">
+<div style="display:flex;gap:8px;margin-top:10px">
+<button class="light" onclick="document.getElementById('postPhoto').click()">📷 Photo/Video</button>
+<button class="green" onclick="createPost()">Post</button>
+</div>
 </div>
 
+<div id="feed">
 <div class="card">
-<h3>পোস্ট</h3>
-<p>শিগগিরই এখানে পোস্ট ও ছবি শেয়ার করতে পারবে।</p>
+<div class="post-head">
+<img class="avatar" src="https://placehold.co/100x100?text=TMF">
+<div><b>TORUN MUSLIM FOUNDATION</b><br><small>Welcome to our community</small></div>
 </div>
-
-<div class="card">
-<h3>বন্ধু ও মেসেজ</h3>
-<p>শিগগিরই বন্ধুদের সঙ্গে যোগাযোগ করতে পারবে।</p>
+<p>আসুন, আমরা সবাই মিলে মানবতার কল্যাণে কাজ করি। ❤️</p>
+<div class="actions">
+<button onclick="likePost(this)">👍 Like</button>
+<button onclick="commentPost(this)">💬 Comment</button>
+<button onclick="sharePost()">↗ Share</button>
 </div>
-
-<div class="card">
-<h3>আমাদের লক্ষ্য</h3>
-<p>একতা, সহযোগিতা ও মানবসেবা।</p>
+</div>
 </div>
 </main>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
-import {
- getAuth,onAuthStateChanged,signOut
-} from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
+<nav>
+<a href="index.html"><span>🏠</span>Home</a>
+<a href="#"><span>👥</span>Community</a>
+<a href="#"><span>❤️</span>Donation</a>
+<a href="messages.html"><span>💬</span>Messages</a>
+<a href="profile.html"><span>👤</span>Profile</a>
+</nav>
 
-const firebaseConfig = {
- apiKey: "AIzaSyAtctGzGlfCUZRl20DYObnknnCA9pgLbx4",
- authDomain: "torun-muslim-found.firebaseapp.com",
- projectId: "torun-muslim-found",
- storageBucket: "torun-muslim-found.firebasestorage.app",
- messagingSenderId: "247180809222",
- appId: "1:247180809222:web:28d055136f8bc747769f87",
- measurementId: "G-BKFXFKQSQF"
+<script>
+let selectedFile=null;
+document.getElementById('postPhoto').onchange=e=>{
+selectedFile=e.target.files[0]||null;
 };
 
-const app=initializeApp(firebaseConfig);
-const auth=getAuth(app);
+function createPost(){
+const text=document.getElementById('postText').value.trim();
+if(!text&&!selectedFile){alert('কিছু লিখো অথবা ছবি নির্বাচন করো');return;}
 
-onAuthStateChanged(auth,(user)=>{
- if(user){
-  document.getElementById("userInfo").textContent =
-   "স্বাগতম, "+(user.displayName || user.email);
- }else{
-  window.location.href="login.html";
- }
-});
+const card=document.createElement('div');
+card.className='card';
 
-document.getElementById("logoutBtn").addEventListener("click",async()=>{
- try{
-  await signOut(auth);
-  window.location.href="login.html";
- }catch(error){
-  alert("Logout করা যায়নি: "+error.message);
- }
-});
+const head=document.createElement('div');
+head.className='post-head';
+head.innerHTML='<img class="avatar" src="https://placehold.co/100x100?text=User"><b>Community User</b>';
+card.appendChild(head);
+
+if(text){
+const p=document.createElement('p');
+p.textContent=text;
+card.appendChild(p);
+}
+
+if(selectedFile){
+const url=URL.createObjectURL(selectedFile);
+const media=selectedFile.type.startsWith('video/')
+?document.createElement('video')
+:document.createElement('img');
+media.src=url;
+media.className='post-img';
+if(media.tagName==='VIDEO'){media.controls=true;}
+card.appendChild(media);
+}
+
+const actions=document.createElement('div');
+actions.className='actions';
+actions.innerHTML='<button>👍 Like</button><button>💬 Comment</button><button>↗ Share</button>';
+actions.children[0].onclick=()=>likePost(actions.children[0]);
+actions.children[1].onclick=()=>commentPost(actions.children[1]);
+actions.children[2].onclick=sharePost;
+card.appendChild(actions);
+
+document.getElementById('feed').prepend(card);
+document.getElementById('postText').value='';
+document.getElementById('postPhoto').value='';
+selectedFile=null;
+}
+
+function likePost(btn){
+if(btn.dataset.liked==='yes'){
+btn.dataset.liked='no';
+btn.textContent='👍 Like';
+}else{
+btn.dataset.liked='yes';
+btn.textContent='❤️ Liked';
+}
+}
+
+function commentPost(btn){
+const comment=prompt('তোমার Comment লিখো');
+if(comment){
+const p=document.createElement('p');
+p.textContent='💬 '+comment;
+btn.parentElement.parentElement.appendChild(p);
+}
+}
+
+function sharePost(){
+if(navigator.share){
+navigator.share({title:'TORUN MUSLIM FOUNDATION',text:'আমাদের কমিউনিটিতে যোগ দাও!'});
+}else{
+alert('Share করার জন্য ব্রাউজারের Share অপশন ব্যবহার করো।');
+}
+}
 </script>
 </body>
 </html>
