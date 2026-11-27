@@ -197,9 +197,9 @@ card.className="card";
 const head=document.createElement("div");
 head.className="post-head";
 
-const avatar=document.createElement("img");
+  const avatar=document.createElement("img");
 avatar.className="avatar";
-avatar.src="https://placehold.co/100x100?text=User";
+avatar.src=data.userPhoto || "https://placehold.co/100x100?text=User";
 
 const userInfo=document.createElement("div");
 const name=document.createElement("b");
