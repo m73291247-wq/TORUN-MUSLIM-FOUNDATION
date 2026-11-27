@@ -30,13 +30,16 @@ nav a{text-decoration:none;color:#176644;font-size:11px;text-align:center}
 nav span{display:block;font-size:21px;margin-bottom:3px}
 main{padding-bottom:75px}
 input[type=file]{display:none}
+#status{font-size:13px;color:#08764d;margin:8px 0}
 </style>
 </head>
 <body>
+
 <header>
 <h3>☪ TORUN MUSLIM FOUNDATION</h3>
 <p>একসাথে ভালো কাজের পথে</p>
 </header>
+
 <main class="container">
 
 <div class="card">
@@ -51,27 +54,16 @@ input[type=file]{display:none}
 <div class="card">
 <b>What's on your mind?</b>
 <textarea id="postText" rows="3" placeholder="তোমার মনের কথা লিখো..."></textarea>
-<input id="postPhoto" type="file" accept="image/*,video/*">
 <div style="display:flex;gap:8px;margin-top:10px">
-<button class="light" onclick="document.getElementById('postPhoto').click()">📷 Photo/Video</button>
-<button class="green" onclick="createPost()">Post</button>
+<button class="green" id="postButton" onclick="createPost()">Post</button>
 </div>
+<p id="status"></p>
 </div>
 
 <div id="feed">
-<div class="card">
-<div class="post-head">
-<img class="avatar" src="https://placehold.co/100x100?text=TMF">
-<div><b>TORUN MUSLIM FOUNDATION</b><br><small>Welcome to our community</small></div>
+<div class="card">পোস্ট লোড হচ্ছে...</div>
 </div>
-<p>আসুন, আমরা সবাই মিলে মানবতার কল্যাণে কাজ করি। ❤️</p>
-<div class="actions">
-<button onclick="likePost(this)">👍 Like</button>
-<button onclick="commentPost(this)">💬 Comment</button>
-<button onclick="sharePost()">↗ Share</button>
-</div>
-</div>
-</div>
+
 </main>
 
 <nav>
@@ -82,81 +74,189 @@ input[type=file]{display:none}
 <a href="profile.html"><span>👤</span>Profile</a>
 </nav>
 
-<script>
-let selectedFile=null;
-document.getElementById('postPhoto').onchange=e=>{
-selectedFile=e.target.files[0]||null;
+<script type="module">
+import {initializeApp}
+from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+
+import {getAuth,onAuthStateChanged}
+from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
+
+import {
+getFirestore,collection,addDoc,doc,getDoc,
+query,orderBy,onSnapshot,serverTimestamp
+}
+from "https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js";
+
+const firebaseConfig={
+apiKey:"AIzaSyAtctGzGlfCUZRl20DYObnknnCA9pgLbx4",
+authDomain:"torun-muslim-found.firebaseapp.com",
+projectId:"torun-muslim-found",
+storageBucket:"torun-muslim-found.firebasestorage.app",
+messagingSenderId:"247180809222",
+appId:"1:247180809222:web:28d055136f8bc747769f87",
+measurementId:"G-BKFXFKQSQF"
 };
 
-function createPost(){
-const text=document.getElementById('postText').value.trim();
-if(!text&&!selectedFile){alert('কিছু লিখো অথবা ছবি নির্বাচন করো');return;}
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
 
-const card=document.createElement('div');
-card.className='card';
+let currentUser=null;
+let stopListening=null;
 
-const head=document.createElement('div');
-head.className='post-head';
-head.innerHTML='<img class="avatar" src="https://placehold.co/100x100?text=User"><b>Community User</b>';
-card.appendChild(head);
+const feed=document.getElementById("feed");
+const status=document.getElementById("status");
+const postButton=document.getElementById("postButton");
 
-if(text){
-const p=document.createElement('p');
-p.textContent=text;
-card.appendChild(p);
+onAuthStateChanged(auth,async user=>{
+if(!user){
+location.href="login.html";
+return;
 }
 
-if(selectedFile){
-const url=URL.createObjectURL(selectedFile);
-const media=selectedFile.type.startsWith('video/')
-?document.createElement('video')
-:document.createElement('img');
-media.src=url;
-media.className='post-img';
-if(media.tagName==='VIDEO'){media.controls=true;}
-card.appendChild(media);
+currentUser=user;
+loadPosts();
+});
+
+async function createPost(){
+
+if(!currentUser){
+alert("আগে Login করো");
+return;
 }
 
-const actions=document.createElement('div');
-actions.className='actions';
-actions.innerHTML='<button>👍 Like</button><button>💬 Comment</button><button>↗ Share</button>';
-actions.children[0].onclick=()=>likePost(actions.children[0]);
-actions.children[1].onclick=()=>commentPost(actions.children[1]);
-actions.children[2].onclick=sharePost;
-card.appendChild(actions);
+const text=document.getElementById("postText").value.trim();
 
-document.getElementById('feed').prepend(card);
-document.getElementById('postText').value='';
-document.getElementById('postPhoto').value='';
-selectedFile=null;
+if(!text){
+alert("আগে কিছু লিখো");
+return;
 }
 
-function likePost(btn){
-if(btn.dataset.liked==='yes'){
-btn.dataset.liked='no';
-btn.textContent='👍 Like';
-}else{
-btn.dataset.liked='yes';
-btn.textContent='❤️ Liked';
+postButton.disabled=true;
+postButton.textContent="Posting...";
+status.textContent="পোস্ট সংরক্ষণ হচ্ছে...";
+
+try{
+
+const userSnap=await getDoc(
+doc(db,"users",currentUser.uid)
+);
+
+const userData=userSnap.exists()?userSnap.data():{};
+
+const userName=
+userData.name||
+currentUser.displayName||
+"User";
+
+await addDoc(collection(db,"posts"),{
+text:text,
+userId:currentUser.uid,
+userName:userName,
+createdAt:serverTimestamp()
+});
+
+document.getElementById("postText").value="";
+status.textContent="সফল হয়েছে! পোস্ট প্রকাশিত হয়েছে।";
+
+}catch(error){
+console.error(error);
+status.textContent="পোস্ট হয়নি: "+error.message;
+}
+
+finally{
+postButton.disabled=false;
+postButton.textContent="Post";
 }
 }
 
-function commentPost(btn){
-const comment=prompt('তোমার Comment লিখো');
-if(comment){
-const p=document.createElement('p');
-p.textContent='💬 '+comment;
-btn.parentElement.parentElement.appendChild(p);
-}
+function loadPosts(){
+
+if(stopListening)stopListening();
+
+const postsQuery=query(
+collection(db,"posts"),
+orderBy("createdAt","desc")
+);
+
+stopListening=onSnapshot(postsQuery,snapshot=>{
+
+feed.innerHTML="";
+
+if(snapshot.empty){
+feed.innerHTML='<div class="card">এখনো কোনো পোস্ট নেই। প্রথম পোস্টটি তুমি করো! ❤️</div>';
+return;
 }
 
-function sharePost(){
+snapshot.forEach(postDoc=>{
+const data=postDoc.data();
+
+const card=document.createElement("div");
+card.className="card";
+
+const head=document.createElement("div");
+head.className="post-head";
+
+const avatar=document.createElement("img");
+avatar.className="avatar";
+avatar.src="https://placehold.co/100x100?text=User";
+
+const userInfo=document.createElement("div");
+const name=document.createElement("b");
+name.textContent=data.userName||"User";
+
+const date=document.createElement("small");
+date.textContent=data.createdAt?.toDate?
+data.createdAt.toDate().toLocaleString("bn-BD"):
+"Just now";
+
+userInfo.append(name,document.createElement("br"),date);
+head.append(avatar,userInfo);
+card.append(head);
+
+const p=document.createElement("p");
+p.textContent=data.text||"";
+card.append(p);
+
+const actions=document.createElement("div");
+actions.className="actions";
+
+const like=document.createElement("button");
+like.textContent="👍 Like";
+like.onclick=()=>alert("Like System পরের ধাপে Firebase-এ যুক্ত হবে।");
+
+const comment=document.createElement("button");
+comment.textContent="💬 Comment";
+comment.onclick=()=>alert("Comment System পরের ধাপে যুক্ত হবে।");
+
+const share=document.createElement("button");
+share.textContent="↗ Share";
+share.onclick=()=>{
 if(navigator.share){
-navigator.share({title:'TORUN MUSLIM FOUNDATION',text:'আমাদের কমিউনিটিতে যোগ দাও!'});
+navigator.share({
+title:"TORUN MUSLIM FOUNDATION",
+text:data.text
+}).catch(()=>{});
 }else{
-alert('Share করার জন্য ব্রাউজারের Share অপশন ব্যবহার করো।');
+alert("এই ব্রাউজারে Share সুবিধা পাওয়া যাচ্ছে না।");
 }
+};
+
+actions.append(like,comment,share);
+card.append(actions);
+feed.append(card);
+
+});
+
+},error=>{
+console.error(error);
+feed.textContent="পোস্ট লোড হয়নি: "+error.message;
+});
+
 }
+
+window.createPost=createPost;
 </script>
+
 </body>
 </html>
