@@ -34,12 +34,14 @@ button{
  font-weight:bold;font-size:15px;
 }
 .info{color:#d5e5dc;overflow-wrap:anywhere}
+h3{color:#e6c477}
 </style>
 </head>
 
 <body>
 
 <div class="card">
+
 <h2>☪ My Profile</h2>
 
 <img id="photo" class="avatar"
@@ -48,6 +50,22 @@ src="https://placehold.co/110x110?text=User">
 <h3 id="name">Loading...</h3>
 <p id="email" class="info"></p>
 <p id="phone" class="info"></p>
+
+<hr>
+
+<h3>Edit Profile</h3>
+
+<input type="text" id="editName"
+placeholder="তোমার নাম">
+
+<input type="tel" id="editPhone"
+placeholder="মোবাইল নম্বর">
+
+<button id="saveProfile">Save Profile Changes</button>
+
+<hr>
+
+<h3>Change Profile Photo</h3>
 
 <input type="file" id="photoInput" accept="image/*">
 
@@ -60,6 +78,7 @@ Back to Dashboard
 </button>
 
 <button id="logout">Logout</button>
+
 </div>
 
 <script type="module">
@@ -72,7 +91,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
 
 import {
- getFirestore,doc,getDoc
+ getFirestore,doc,getDoc,updateDoc
 } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js";
 
 const firebaseConfig={
@@ -108,9 +127,6 @@ onAuthStateChanged(auth,async user=>{
 
  currentUser=user;
 
- document.getElementById("name").textContent=
- user.displayName || "User";
-
  document.getElementById("email").textContent=
  "Gmail: "+(user.email || "");
 
@@ -119,9 +135,11 @@ onAuthStateChanged(auth,async user=>{
  }
 
  try{
+
   const snap=await getDoc(doc(db,"users",user.uid));
 
   if(snap.exists()){
+
    const data=snap.data();
 
    document.getElementById("name").textContent=
@@ -129,14 +147,97 @@ onAuthStateChanged(auth,async user=>{
 
    document.getElementById("phone").textContent=
    "Mobile: "+(data.phone || "Not added");
+
+   document.getElementById("editName").value=
+   data.name || user.displayName || "";
+
+   document.getElementById("editPhone").value=
+   data.phone || "";
+
+  }else{
+
+   document.getElementById("name").textContent=
+   user.displayName || "User";
+
+   document.getElementById("editName").value=
+   user.displayName || "";
+
   }
 
  }catch(error){
+
   message.textContent=
   "Profile load হয়নি: "+error.message;
+
  }
 
 });
+
+// SAVE PROFILE INFORMATION
+
+document.getElementById("saveProfile")
+.onclick=async()=>{
+
+ if(!currentUser)return;
+
+ const name=document.getElementById("editName")
+ .value.trim();
+
+ const phone=document.getElementById("editPhone")
+ .value.trim();
+
+ if(!name){
+  alert("তোমার নাম লিখো।");
+  return;
+ }
+
+ const button=document.getElementById("saveProfile");
+
+ button.disabled=true;
+ button.textContent="Saving...";
+
+ try{
+
+  const userRef=doc(db,"users",currentUser.uid);
+
+  const snap=await getDoc(userRef);
+
+  if(!snap.exists()){
+   throw new Error("User profile পাওয়া যায়নি।");
+  }
+
+  await updateDoc(userRef,{
+   name:name,
+   phone:phone
+  });
+
+  await updateProfile(currentUser,{
+   displayName:name
+  });
+
+  document.getElementById("name").textContent=name;
+
+  document.getElementById("phone").textContent=
+  "Mobile: "+(phone || "Not added");
+
+  message.textContent=
+  "Profile information সফলভাবে আপডেট হয়েছে!";
+
+ }catch(error){
+
+  message.textContent=
+  "Update হয়নি: "+error.message;
+
+ }finally{
+
+  button.disabled=false;
+  button.textContent="Save Profile Changes";
+
+ }
+
+};
+
+// SELECT PHOTO
 
 document.getElementById("photoInput")
 .addEventListener("change",e=>{
@@ -170,6 +271,8 @@ document.getElementById("photoInput")
 
 });
 
+// UPLOAD PHOTO
+
 document.getElementById("savePhoto")
 .onclick=async()=>{
 
@@ -182,11 +285,9 @@ document.getElementById("savePhoto")
 
  button.disabled=true;
  button.textContent="Uploading...";
- message.textContent="ছবি আপলোড হচ্ছে, অপেক্ষা করো...";
 
  try{
 
-  // Step 1: Get secure upload authentication
   const authResponse=await fetch(WORKER_URL);
 
   if(!authResponse.ok){
@@ -197,7 +298,6 @@ document.getElementById("savePhoto")
 
   const authData=await authResponse.json();
 
-  // Step 2: Prepare ImageKit upload
   const formData=new FormData();
 
   formData.append("file",selectedPhoto);
@@ -207,7 +307,6 @@ document.getElementById("savePhoto")
   formData.append("expire",authData.expire);
   formData.append("signature",authData.signature);
 
-  // Step 3: Upload image to ImageKit
   const uploadResponse=await fetch(
    "https://upload.imagekit.io/api/v1/files/upload",
    {
@@ -228,7 +327,6 @@ document.getElementById("savePhoto")
    throw new Error("Image URL পাওয়া যায়নি।");
   }
 
-  // Step 4: Save ImageKit URL in Firebase Auth
   await updateProfile(currentUser,{
    photoURL:result.url
   });
@@ -236,18 +334,20 @@ document.getElementById("savePhoto")
   photo.src=result.url;
 
   selectedPhoto=null;
-
   document.getElementById("photoInput").value="";
 
+  if(previewURL){
+   URL.revokeObjectURL(previewURL);
+   previewURL=null;
+  }
+
   message.textContent=
-   "সফল হয়েছে! তোমার Profile Photo সংরক্ষণ করা হয়েছে।";
+  "Profile Photo সফলভাবে সংরক্ষণ হয়েছে!";
 
  }catch(error){
 
-  console.error(error);
-
   message.textContent=
-   "ছবি আপলোড হয়নি: "+error.message;
+  "ছবি আপলোড হয়নি: "+error.message;
 
  }finally{
 
@@ -257,6 +357,8 @@ document.getElementById("savePhoto")
  }
 
 };
+
+// LOGOUT
 
 document.getElementById("logout")
 .onclick=async()=>{
