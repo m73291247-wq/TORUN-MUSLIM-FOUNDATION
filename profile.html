@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>My Profile - TORUN MUSLIM FOUNDATION</title>
+
 <style>
 *{box-sizing:border-box}
 body{
@@ -33,9 +34,9 @@ button{
  font-weight:bold;font-size:15px;
 }
 .info{color:#d5e5dc;overflow-wrap:anywhere}
-a{color:#e6c477}
 </style>
 </head>
+
 <body>
 
 <div class="card">
@@ -49,6 +50,7 @@ src="https://placehold.co/110x110?text=User">
 <p id="phone" class="info"></p>
 
 <input type="file" id="photoInput" accept="image/*">
+
 <button id="savePhoto">Save Profile Photo</button>
 
 <p id="message"></p>
@@ -61,14 +63,17 @@ Back to Dashboard
 </div>
 
 <script type="module">
+
 import {initializeApp}
 from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
 
-import {getAuth,onAuthStateChanged,signOut}
-from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
+import {
+ getAuth,onAuthStateChanged,signOut,updateProfile
+} from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
 
-import {getFirestore,doc,getDoc}
-from "https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js";
+import {
+ getFirestore,doc,getDoc
+} from "https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js";
 
 const firebaseConfig={
  apiKey:"AIzaSyAtctGzGlfCUZRl20DYObnknnCA9pgLbx4",
@@ -84,14 +89,23 @@ const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getFirestore(app);
 
+const WORKER_URL =
+"https://torun-muslim-upload.m73291247.workers.dev/";
+
 let currentUser=null;
-let selectedPhoto="";
+let selectedPhoto=null;
+let previewURL=null;
+
+const photo=document.getElementById("photo");
+const message=document.getElementById("message");
 
 onAuthStateChanged(auth,async user=>{
+
  if(!user){
   location.href="login.html";
   return;
  }
+
  currentUser=user;
 
  document.getElementById("name").textContent=
@@ -100,28 +114,42 @@ onAuthStateChanged(auth,async user=>{
  document.getElementById("email").textContent=
  "Gmail: "+(user.email || "");
 
+ if(user.photoURL){
+  photo.src=user.photoURL;
+ }
+
  try{
   const snap=await getDoc(doc(db,"users",user.uid));
+
   if(snap.exists()){
    const data=snap.data();
+
    document.getElementById("name").textContent=
-    data.name || user.displayName || "User";
+   data.name || user.displayName || "User";
+
    document.getElementById("phone").textContent=
-    "Mobile: "+(data.phone || "Not added");
+   "Mobile: "+(data.phone || "Not added");
   }
+
  }catch(error){
-  document.getElementById("message").textContent=
-   "Profile data load হয়নি: "+error.message;
+  message.textContent=
+  "Profile load হয়নি: "+error.message;
  }
 
- if(user.photoURL){
-  document.getElementById("photo").src=user.photoURL;
- }
 });
 
-document.getElementById("photoInput").addEventListener("change",e=>{
+document.getElementById("photoInput")
+.addEventListener("change",e=>{
+
  const file=e.target.files[0];
+
  if(!file)return;
+
+ if(!file.type.startsWith("image/")){
+  alert("শুধু ছবি নির্বাচন করো।");
+  e.target.value="";
+  return;
+ }
 
  if(file.size>1024*1024){
   alert("ছবির সাইজ ১ MB-এর কম রাখো।");
@@ -129,49 +157,115 @@ document.getElementById("photoInput").addEventListener("change",e=>{
   return;
  }
 
- if(!file.type.startsWith("image/")){
-  alert("শুধু ছবি নির্বাচন করো।");
-  return;
+ selectedPhoto=file;
+
+ if(previewURL){
+  URL.revokeObjectURL(previewURL);
  }
 
- selectedPhoto=file;
- document.getElementById("photo").src=
-  URL.createObjectURL(file);
+ previewURL=URL.createObjectURL(file);
+ photo.src=previewURL;
+
+ message.textContent="ছবি নির্বাচন করা হয়েছে।";
+
 });
 
-document.getElementById("savePhoto").onclick=async()=>{
+document.getElementById("savePhoto")
+.onclick=async()=>{
+
  if(!currentUser || !selectedPhoto){
   alert("আগে একটি ছবি নির্বাচন করো।");
   return;
  }
 
+ const button=document.getElementById("savePhoto");
+
+ button.disabled=true;
+ button.textContent="Uploading...";
+ message.textContent="ছবি আপলোড হচ্ছে, অপেক্ষা করো...";
+
  try{
-  const reader=new FileReader();
-  reader.onload=async()=>{
-   try{
-    await updateProfile(currentUser,{
-     photoURL:reader.result
-    });
-    document.getElementById("message").textContent=
-     "Profile photo saved!";
-   }catch(error){
-    document.getElementById("message").textContent=
-     "ছবি সেভ হয়নি: "+error.message;
+
+  // Step 1: Get secure upload authentication
+  const authResponse=await fetch(WORKER_URL);
+
+  if(!authResponse.ok){
+   throw new Error(
+    "Worker error: "+await authResponse.text()
+   );
+  }
+
+  const authData=await authResponse.json();
+
+  // Step 2: Prepare ImageKit upload
+  const formData=new FormData();
+
+  formData.append("file",selectedPhoto);
+  formData.append("fileName",selectedPhoto.name);
+  formData.append("publicKey",authData.publicKey);
+  formData.append("token",authData.token);
+  formData.append("expire",authData.expire);
+  formData.append("signature",authData.signature);
+
+  // Step 3: Upload image to ImageKit
+  const uploadResponse=await fetch(
+   "https://upload.imagekit.io/api/v1/files/upload",
+   {
+    method:"POST",
+    body:formData
    }
-  };
-  reader.readAsDataURL(selectedPhoto);
+  );
+
+  const result=await uploadResponse.json();
+
+  if(!uploadResponse.ok){
+   throw new Error(
+    result.message || "ImageKit upload failed"
+   );
+  }
+
+  if(!result.url){
+   throw new Error("Image URL পাওয়া যায়নি।");
+  }
+
+  // Step 4: Save ImageKit URL in Firebase Auth
+  await updateProfile(currentUser,{
+   photoURL:result.url
+  });
+
+  photo.src=result.url;
+
+  selectedPhoto=null;
+
+  document.getElementById("photoInput").value="";
+
+  message.textContent=
+   "সফল হয়েছে! তোমার Profile Photo সংরক্ষণ করা হয়েছে।";
+
  }catch(error){
-  document.getElementById("message").textContent=error.message;
+
+  console.error(error);
+
+  message.textContent=
+   "ছবি আপলোড হয়নি: "+error.message;
+
+ }finally{
+
+  button.disabled=false;
+  button.textContent="Save Profile Photo";
+
  }
+
 };
 
-import {updateProfile}
-from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
+document.getElementById("logout")
+.onclick=async()=>{
 
-document.getElementById("logout").onclick=async()=>{
  await signOut(auth);
  location.href="login.html";
+
 };
+
 </script>
 </body>
 </html>
