@@ -4,37 +4,145 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>My Profile - TORUN MUSLIM FOUNDATION</title>
+<title>My Profile | TORUN MUSLIM FOUNDATION</title>
 
 <style>
 *{box-sizing:border-box}
+
 body{
- margin:0;padding:25px 15px;font-family:Arial;
- background:#061f18;color:white;
+ margin:0;
+ padding:25px 14px;
+ font-family:Arial,sans-serif;
+ background:linear-gradient(145deg,#031710,#0b3023,#061d16);
+ color:white;
+ min-height:100vh;
 }
+
 .card{
- max-width:420px;margin:30px auto;padding:25px;
- background:#103b2d;border:1px solid #b99a52;
- border-radius:20px;text-align:center;
+ max-width:440px;
+ margin:20px auto;
+ padding:25px 20px;
+ background:linear-gradient(145deg,#124432,#09291e);
+ border:1px solid #b99a52;
+ border-radius:24px;
+ text-align:center;
+ box-shadow:0 12px 35px #0008;
 }
-h2{color:#e6c477}
+
+.logo{
+ color:#e7c77c;
+ font-size:13px;
+ letter-spacing:2px;
+ margin-bottom:20px;
+}
+
+h2{
+ color:#f0d28d;
+ margin:8px 0 20px;
+}
+
 .avatar{
- width:110px;height:110px;border-radius:50%;
- object-fit:cover;border:3px solid #d5b66c;
- background:#fff;
+ width:125px;
+ height:125px;
+ border-radius:50%;
+ object-fit:cover;
+ border:4px solid #d7b66e;
+ background:white;
+ box-shadow:0 0 20px #d7b66e55;
 }
+
+.name{
+ color:#f0d28d;
+ margin:14px 0 5px;
+ font-size:22px;
+}
+
+.info{
+ color:#d4e4da;
+ font-size:14px;
+ overflow-wrap:anywhere;
+ margin:8px 0;
+}
+
+.section{
+ margin-top:25px;
+ padding:18px;
+ background:#061f18;
+ border:1px solid #456b53;
+ border-radius:16px;
+ text-align:left;
+}
+
+.section h3{
+ color:#e7c77c;
+ text-align:center;
+ margin:0 0 15px;
+}
+
+label{
+ display:block;
+ color:#e6c77f;
+ font-size:13px;
+ margin-top:12px;
+}
+
 input{
- width:100%;padding:12px;margin:10px 0;
- border-radius:8px;border:1px solid #b99a52;
+ width:100%;
+ padding:13px;
+ margin-top:7px;
+ border-radius:9px;
+ border:1px solid #b99a52;
+ background:#f7f8f2;
+ color:#152d20;
+ font-size:15px;
+ outline:none;
 }
+
 button{
- width:100%;padding:13px;margin-top:12px;
- border:0;border-radius:9px;
- background:#d5b66c;color:#102d21;
- font-weight:bold;font-size:15px;
+ width:100%;
+ padding:13px;
+ margin-top:12px;
+ border:0;
+ border-radius:10px;
+ background:linear-gradient(90deg,#c7a45c,#f0d58f);
+ color:#102d21;
+ font-weight:bold;
+ font-size:14px;
+ cursor:pointer;
 }
-.info{color:#d5e5dc;overflow-wrap:anywhere}
-h3{color:#e6c477}
+
+button:disabled{
+ opacity:.6;
+ cursor:not-allowed;
+}
+
+.secondary{
+ background:#174d38;
+ color:white;
+ border:1px solid #b99a52;
+}
+
+.danger{
+ background:#77352f;
+ color:white;
+}
+
+#editBox[hidden]{
+ display:none!important;
+}
+
+#message{
+ color:#f0d28d;
+ font-size:13px;
+ line-height:1.5;
+ overflow-wrap:anywhere;
+}
+
+.footer{
+ color:#9bb8a6;
+ font-size:11px;
+ margin-top:20px;
+}
 </style>
 </head>
 
@@ -42,42 +150,71 @@ h3{color:#e6c477}
 
 <div class="card">
 
-<h2>☪ My Profile</h2>
+<div class="logo">☪ TORUN MUSLIM FOUNDATION</div>
+
+<h2>My Profile</h2>
 
 <img id="photo" class="avatar"
-src="https://placehold.co/110x110?text=User">
+src="https://placehold.co/125x125?text=User">
 
-<h3 id="name">Loading...</h3>
+<h3 id="name" class="name">Loading...</h3>
+
 <p id="email" class="info"></p>
 <p id="phone" class="info"></p>
 
-<hr>
+<button id="editButton">
+✏️ Edit Profile
+</button>
 
-<h3>Edit Profile</h3>
+<div id="editBox" class="section" hidden>
 
-<input type="text" id="editName"
-placeholder="তোমার নাম">
+<h3>Edit Your Profile</h3>
 
-<input type="tel" id="editPhone"
-placeholder="মোবাইল নম্বর">
+<label>Your Name</label>
+<input id="editName" type="text"
+placeholder="তোমার নাম লিখো">
 
-<button id="saveProfile">Save Profile Changes</button>
+<label>Mobile Number</label>
+<input id="editPhone" type="tel"
+placeholder="মোবাইল নম্বর লিখো">
 
-<hr>
+<button id="saveProfile">
+Save Changes
+</button>
+
+<button id="cancelEdit" class="secondary">
+Cancel
+</button>
+
+</div>
+
+<div class="section">
 
 <h3>Change Profile Photo</h3>
 
-<input type="file" id="photoInput" accept="image/*">
+<input type="file" id="photoInput"
+accept="image/*">
 
-<button id="savePhoto">Save Profile Photo</button>
+<button id="savePhoto">
+Upload New Photo
+</button>
+
+</div>
 
 <p id="message"></p>
 
-<button onclick="location.href='index.html'">
-Back to Dashboard
+<button class="secondary"
+onclick="location.href='index.html'">
+⌂ Back to Dashboard
 </button>
 
-<button id="logout">Logout</button>
+<button id="logout" class="danger">
+Logout
+</button>
+
+<div class="footer">
+TORUN MUSLIM FOUNDATION © 2026
+</div>
 
 </div>
 
@@ -108,7 +245,7 @@ const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getFirestore(app);
 
-const WORKER_URL =
+const WORKER_URL=
 "https://torun-muslim-upload.m73291247.workers.dev/";
 
 let currentUser=null;
@@ -117,6 +254,13 @@ let previewURL=null;
 
 const photo=document.getElementById("photo");
 const message=document.getElementById("message");
+const editBox=document.getElementById("editBox");
+
+function showMessage(text){
+ message.textContent=text;
+}
+
+// LOAD PROFILE
 
 onAuthStateChanged(auth,async user=>{
 
@@ -142,17 +286,15 @@ onAuthStateChanged(auth,async user=>{
 
    const data=snap.data();
 
-   document.getElementById("name").textContent=
-   data.name || user.displayName || "User";
+   const name=data.name || user.displayName || "User";
+   const phone=data.phone || "";
 
+   document.getElementById("name").textContent=name;
    document.getElementById("phone").textContent=
-   "Mobile: "+(data.phone || "Not added");
+   "Mobile: "+(phone || "Not added");
 
-   document.getElementById("editName").value=
-   data.name || user.displayName || "";
-
-   document.getElementById("editPhone").value=
-   data.phone || "";
+   document.getElementById("editName").value=name;
+   document.getElementById("editPhone").value=phone;
 
   }else{
 
@@ -166,14 +308,39 @@ onAuthStateChanged(auth,async user=>{
 
  }catch(error){
 
-  message.textContent=
-  "Profile load হয়নি: "+error.message;
+  showMessage("Profile load হয়নি: "+error.message);
 
  }
 
 });
 
-// SAVE PROFILE INFORMATION
+// OPEN EDIT BOX
+
+document.getElementById("editButton")
+.onclick=()=>{
+
+ editBox.hidden=false;
+
+ document.getElementById("editButton").hidden=true;
+
+ showMessage("তোমার তথ্য পরিবর্তন করো।");
+
+};
+
+// CANCEL EDIT
+
+document.getElementById("cancelEdit")
+.onclick=()=>{
+
+ editBox.hidden=true;
+
+ document.getElementById("editButton").hidden=false;
+
+ showMessage("");
+
+};
+
+// SAVE PROFILE
 
 document.getElementById("saveProfile")
 .onclick=async()=>{
@@ -220,18 +387,19 @@ document.getElementById("saveProfile")
   document.getElementById("phone").textContent=
   "Mobile: "+(phone || "Not added");
 
-  message.textContent=
-  "Profile information সফলভাবে আপডেট হয়েছে!";
+  editBox.hidden=true;
+  document.getElementById("editButton").hidden=false;
+
+  showMessage("সফল হয়েছে! Profile আপডেট করা হয়েছে।");
 
  }catch(error){
 
-  message.textContent=
-  "Update হয়নি: "+error.message;
+  showMessage("Update হয়নি: "+error.message);
 
  }finally{
 
   button.disabled=false;
-  button.textContent="Save Profile Changes";
+  button.textContent="Save Changes";
 
  }
 
@@ -267,7 +435,7 @@ document.getElementById("photoInput")
  previewURL=URL.createObjectURL(file);
  photo.src=previewURL;
 
- message.textContent="ছবি নির্বাচন করা হয়েছে।";
+ showMessage("ছবি নির্বাচন করা হয়েছে।");
 
 });
 
@@ -332,8 +500,8 @@ document.getElementById("savePhoto")
   });
 
   photo.src=result.url;
-
   selectedPhoto=null;
+
   document.getElementById("photoInput").value="";
 
   if(previewURL){
@@ -341,18 +509,16 @@ document.getElementById("savePhoto")
    previewURL=null;
   }
 
-  message.textContent=
-  "Profile Photo সফলভাবে সংরক্ষণ হয়েছে!";
+  showMessage("সফল হয়েছে! নতুন Profile Photo সংরক্ষণ হয়েছে।");
 
  }catch(error){
 
-  message.textContent=
-  "ছবি আপলোড হয়নি: "+error.message;
+  showMessage("ছবি আপলোড হয়নি: "+error.message);
 
  }finally{
 
   button.disabled=false;
-  button.textContent="Save Profile Photo";
+  button.textContent="Upload New Photo";
 
  }
 
@@ -369,5 +535,6 @@ document.getElementById("logout")
 };
 
 </script>
+
 </body>
 </html>
