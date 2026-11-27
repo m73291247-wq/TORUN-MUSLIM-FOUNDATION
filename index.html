@@ -153,6 +153,7 @@ await addDoc(collection(db,"posts"),{
 text:text,
 userId:currentUser.uid,
 userName:userName,
+userPhoto: currentUser.photoURL || "",
 createdAt:serverTimestamp()
 });
 
